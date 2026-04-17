@@ -236,7 +236,7 @@
   <div id="login-screen">
     <img src="image/logoummanabc.png" alt="ummana" />
     <div id="login-form">
-      <input type="text" id="username" placeholder="usuario" autocomplete="off" />
+      <input type="email" id="username" placeholder="email" autocomplete="off" />
       <input type="password" id="password" placeholder="contraseña" />
       <button onclick="handleLogin()">ingresar</button>
       <p id="error-msg">usuario o contraseña incorrectos</p>
@@ -392,21 +392,40 @@
 
   <button id="logout-btn" onclick="handleLogout()">salir</button>
 
-<script>
-  const USERS = {
-    administracion: { pass: 'administracion', role: 'admin' },
-    profesionales:  { pass: 'profesionales',  role: 'pro' }
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCp3Wy9c6UYiNMlEFLwfNwjpHdufjYbhr4",
+    authDomain: "ummanainterno.firebaseapp.com",
+    projectId: "ummanainterno",
+    storageBucket: "ummanainterno.firebasestorage.app",
+    messagingSenderId: "224573570065",
+    appId: "1:224573570065:web:bfe3a723b7316ed6e245b0"
   };
 
-  function handleLogin() {
-    const u = document.getElementById('username').value.trim();
-    const p = document.getElementById('password').value;
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Rol según email
+  function getRoleFromEmail(email) {
+    if (email === 'administracion@ummana.ar') return 'admin';
+    if (email === 'profesionales@ummana.ar') return 'pro';
+    return null;
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
     const err = document.getElementById('error-msg');
-    const user = USERS[u];
-    if (user && user.pass === p) {
+
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const role = getRoleFromEmail(result.user.email);
       err.classList.remove('visible');
-      showScreen(user.role);
-    } else {
+      showScreen(role);
+    } catch (e) {
       err.classList.add('visible');
       document.getElementById('password').value = '';
       document.getElementById('password').focus();
@@ -425,7 +444,8 @@
     }
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await signOut(auth);
     document.getElementById('admin-screen').style.display = 'none';
     document.getElementById('pro-screen').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'none';
@@ -439,6 +459,11 @@
   function toggleAcc(btn) {
     btn.parentElement.classList.toggle('open');
   }
+
+  // Exponer funciones al HTML
+  window.handleLogin = handleLogin;
+  window.handleLogout = handleLogout;
+  window.toggleAcc = toggleAcc;
 
   ['username','password'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
