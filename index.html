@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ummana</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.6s ease;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    animation: fadeIn 0.8s ease both;
+  }
+
+  #login-screen h1 {
+    font-size: clamp(2.8rem, 8vw, 5.5rem);
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    color: #111;
+    user-select: none;
+  }
+
+  #login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 260px;
+  }
+
+  #login-form input {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    background: #fff;
+    color: #111;
+    outline: none;
+    transition: border-color 0.25s;
+  }
+
+  #login-form input::placeholder { color: #aaa; }
+  #login-form input:focus { border-color: #999; }
+
+  #login-form button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: lowercase;
+    padding: 12px 16px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  #login-form button:hover { background: #333; }
+  #login-form button:active { transform: scale(0.98); }
+
+  #error-msg {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: #c00;
+    text-align: center;
+    min-height: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  #error-msg.visible { opacity: 1; }
+
+  /* ── ADMIN ── */
+  #admin-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.8s ease both;
+  }
+
+  #admin-screen h1 {
+    font-size: clamp(2.8rem, 8vw, 5.5rem);
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    color: #fff;
+    user-select: none;
+  }
+
+  /* ── PROFESIONALES ── */
+  #pro-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 60px 20px 80px;
+    animation: fadeIn 0.8s ease both;
+  }
+
+  .pro-logo {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    color: #111;
+    margin-bottom: 48px;
+    user-select: none;
+  }
+
+  .accordion-wrap {
+    width: 100%;
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .acc-item {
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .acc-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: #222;
+    text-align: left;
+    transition: background 0.2s;
+  }
+
+  .acc-header:hover { background: #fafafa; }
+
+  .acc-arrow {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  .acc-item.open .acc-arrow { transform: rotate(180deg); }
+
+  .acc-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    background: #fafafa;
+  }
+
+  .acc-item.open .acc-body {
+    max-height: 1200px;
+    border-top: 1px solid #e8e8e8;
+  }
+
+  .acc-body ul { list-style: none; padding: 8px 0; }
+
+  .acc-body ul li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 22px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: #444;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .acc-body ul li a:hover { background: #efefef; color: #111; }
+  .acc-body ul li a svg { flex-shrink: 0; opacity: 0.35; }
+
+  /* ── LOGOUT ── */
+  #logout-btn {
+    position: fixed;
+    top: 22px;
+    right: 24px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.35;
+    display: none;
+    transition: opacity 0.2s;
+  }
+
+  #logout-btn:hover { opacity: 0.8; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body id="body">
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <h1>ummana</h1>
+    <div id="login-form">
+      <input type="text" id="username" placeholder="usuario" autocomplete="off" />
+      <input type="password" id="password" placeholder="contraseña" />
+      <button onclick="handleLogin()">ingresar</button>
+      <p id="error-msg">usuario o contraseña incorrectos</p>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin-screen">
+    <h1>ummana</h1>
+  </div>
+
+  <!-- PROFESIONALES -->
+  <div id="pro-screen">
+    <div class="pro-logo">ummana</div>
+    <div class="accordion-wrap">
+
+      <!-- PLANILLAS GENERALES -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          PLANILLAS GENERALES
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/planilla-de-derivacion.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Planilla de derivación</a></li>
+        </ul></div>
+      </div>
+
+      <!-- ACTIVIDAD FÍSICA -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          ACTIVIDAD FÍSICA
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/actividad-fisica-estimulacion-vagal.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Actividad física recomendada para la estimulación vagal</a></li>
+          <li><a href="pdfs/actividad-fisica-mujer-sana.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Actividad física para la mujer sana</a></li>
+        </ul></div>
+      </div>
+
+      <!-- COSMETOLOGÍA -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          COSMETOLOGÍA
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/metodo-de-trabajo.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Método de trabajo</a></li>
+          <li><a href="pdfs/indicaciones-post-peeling.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Indicaciones post peeling</a></li>
+          <li><a href="pdfs/indicaciones-post-microneedling.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Indicaciones post microneedling</a></li>
+          <li><a href="pdfs/indicaciones-post-radiofrecuencia-endymed.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Indicaciones post radiofrecuencia Endymed</a></li>
+        </ul></div>
+      </div>
+
+      <!-- DERMATOLOGÍA Y ESTÉTICA -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          DERMATOLOGÍA Y ESTÉTICA
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/toxina-botulinica-dysport.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Toxina botulínica Dysport</a></li>
+          <li><a href="pdfs/peeling-facial.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Peeling facial</a></li>
+          <li><a href="pdfs/laser-co2-facial.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Láser CO2 facial</a></li>
+          <li><a href="pdfs/laser-co2-cicatrices.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Láser CO2 para cicatrices</a></li>
+          <li><a href="pdfs/bioestimuladores.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Bioestimuladores</a></li>
+          <li><a href="pdfs/radiofrecuencia-facial-endymed.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Radiofrecuencia facial Endymed</a></li>
+          <li><a href="pdfs/radiofrecuencia-corporal-endymed.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Radiofrecuencia corporal Endymed</a></li>
+          <li><a href="pdfs/mesoterapia-facial.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Mesoterapia facial</a></li>
+          <li><a href="pdfs/mesoterapia-capilar.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Mesoterapia capilar</a></li>
+          <li><a href="pdfs/prp-plasma-rico-en-plaquetas.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PRP (Plasma Rico en Plaquetas)</a></li>
+        </ul></div>
+      </div>
+
+      <!-- ESTRÉS ADRENAL -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          ESTRÉS ADRENAL
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/protocolo-respiracion-diafragmatica.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Protocolo de respiración diafragmática</a></li>
+          <li><a href="pdfs/habitos-relajacion-regulacion.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Hábitos diarios de relajación y regulación</a></li>
+          <li><a href="pdfs/protocolo-exposicion-frio.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Protocolo de exposición progresiva al frío</a></li>
+        </ul></div>
+      </div>
+
+      <!-- GINECOLOGÍA -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          GINECOLOGÍA
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/pellet-testosterona.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Pellet testosterona</a></li>
+          <li><a href="pdfs/laser-genital-femenino.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Láser genital femenino</a></li>
+          <li><a href="pdfs/prp-acido-hialuronico-vaginal.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PRP / Ácido hialurónico vaginal</a></li>
+        </ul></div>
+      </div>
+
+      <!-- GASTROENTEROLOGÍA -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          GASTROENTEROLOGÍA
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/sibo.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Sibo</a></li>
+          <li><a href="pdfs/medidas-naturales-acidez-gastrica.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Medidas naturales para el abordaje de la acidez gástrica</a></li>
+          <li><a href="pdfs/medidas-naturales-evacuacion.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Medidas naturales para favorecer la evacuación</a></li>
+        </ul></div>
+      </div>
+
+      <!-- NUTRICIÓN -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          NUTRICIÓN
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/organizacion-diaria.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Organización diaria</a></li>
+          <li><a href="pdfs/primeras-pautas-alimentacion.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Primeras pautas para comenzar tu cambio en la alimentación</a></li>
+          <li><a href="pdfs/pautas-alimentacion-consciente.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Pautas para continuar tu cambio en la alimentación consciente</a></li>
+          <li><a href="pdfs/grupos-alimentos-saludable.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Grupos de alimentos para una alimentación saludable</a></li>
+          <li><a href="pdfs/alimentacion-anemia-ferropenica.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Sugerencias de alimentación para pacientes con anemia ferropénica</a></li>
+          <li><a href="pdfs/estrategias-indice-glucemico.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Estrategias para bajar el índice glucémico de los alimentos</a></li>
+        </ul></div>
+      </div>
+
+      <!-- SUEÑO Y DESCANSO -->
+      <div class="acc-item">
+        <button class="acc-header" onclick="toggleAcc(this)">
+          SUEÑO Y DESCANSO
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-body"><ul>
+          <li><a href="pdfs/guia-alimentacion-antiinflamatoria.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Guía de alimentación antiinflamatoria</a></li>
+          <li><a href="pdfs/importancia-cortisol-saliva.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>La importancia de evaluar el cortisol en saliva</a></li>
+          <li><a href="pdfs/como-usar-xylitol.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Cómo usar tu Xylitol</a></li>
+          <li><a href="pdfs/ebook-liberate-alergia-estacional.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Ebook: Liberate de la alergia estacional</a></li>
+          <li><a href="pdfs/guia-mejorar-sueno.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Guía para mejorar tu sueño</a></li>
+          <li><a href="pdfs/sensor.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Sensor</a></li>
+          <li><a href="pdfs/oidos-tapados-destapados.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>¿Por qué se me tapan y destapan los oídos?</a></li>
+          <li><a href="pdfs/reglas-higiene-sueno.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Reglas de higiene del sueño</a></li>
+          <li><a href="pdfs/tecnicas-estimulacion-vagal-descanso.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Técnicas de estimulación vagal para favorecer el descanso</a></li>
+          <li><a href="pdfs/cpap-hoja-educativa-paciente.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Hoja educativa para paciente</a></li>
+          <li><a href="pdfs/cpap-guia-entender-usar.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Guía para entender y usar tu CPAP</a></li>
+          <li><a href="pdfs/cpap-humidificador.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Humidificador</a></li>
+          <li><a href="pdfs/cpap-cambio-mascarilla.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Cuándo debo cambiar la mascarilla</a></li>
+          <li><a href="pdfs/cpap-fugas.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Fugas</a></li>
+          <li><a href="pdfs/cpap-uso-avion.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Uso en avión</a></li>
+          <li><a href="pdfs/cpap-otras-preguntas.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>CPAP: Otras preguntas</a></li>
+          <li><a href="pdfs/certificado-constancia-medica.pdf" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificado / Constancia médica</a></li>
+        </ul></div>
+      </div>
+
+    </div>
+  </div>
+
+  <button id="logout-btn" onclick="handleLogout()">salir</button>
+
+<script>
+  const USERS = {
+    administracion: { pass: 'administracion', role: 'admin' },
+    profesionales:  { pass: 'profesionales',  role: 'pro' }
+  };
+
+  function handleLogin() {
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    const err = document.getElementById('error-msg');
+    const user = USERS[u];
+
+    if (user && user.pass === p) {
+      err.classList.remove('visible');
+      showScreen(user.role);
+    } else {
+      err.classList.add('visible');
+      document.getElementById('password').value = '';
+      document.getElementById('password').focus();
+    }
+  }
+
+  function showScreen(role) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'block';
+
+    if (role === 'admin') {
+      document.getElementById('admin-screen').style.display = 'flex';
+      document.body.style.background = '#C8B89A';
+      document.getElementById('logout-btn').style.color = 'rgba(255,255,255,0.6)';
+      document.body.style.alignItems = 'center';
+    } else {
+      document.getElementById('pro-screen').style.display = 'flex';
+      document.body.style.background = '#fff';
+      document.getElementById('logout-btn').style.color = '#111';
+      document.body.style.alignItems = 'flex-start';
+    }
+  }
+
+  function handleLogout() {
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('pro-screen').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.body.style.background = '#fff';
+    document.body.style.alignItems = 'center';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('open'));
+  }
+
+  function toggleAcc(btn) {
+    btn.parentElement.classList.toggle('open');
+  }
+
+  ['username','password'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  });
+</script>
+</body>
+</html>
