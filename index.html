@@ -82,8 +82,8 @@
   }
   #admin-screen img { height: clamp(1.6rem, 4vw, 2.2rem); width: auto; margin-bottom: 48px; filter: brightness(0) saturate(100%) invert(18%) sepia(5%) saturate(500%) hue-rotate(10deg) brightness(95%); }
   #admin-screen .accordion-wrap { max-width: 1400px; }
-  #admin-screen .acc-body { transition: none; }
-  #admin-screen .acc-item.open .acc-body { max-height: 8000px; }
+  #admin-screen .acc-body { transition: none; max-height: 0; overflow: hidden; }
+  #admin-screen .acc-item.open .acc-body { max-height: 8000px !important; overflow: visible !important; }
   #pro-screen {
     display: none;
     flex-direction: column;
