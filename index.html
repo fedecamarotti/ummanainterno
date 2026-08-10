@@ -177,7 +177,8 @@
  }
  .chart-legend {
  display: flex;
- gap: 18px;
+ flex-wrap: wrap;
+ gap: 10px 18px;
  justify-content: center;
  margin-top: 10px;
  }
@@ -520,6 +521,22 @@
 <div class="chart-legend"></div>
 </div>
 </div>
+<div class="chart-card" data-chart-id="totalClasesPrueba">
+<div class="chart-card-header"><h3 class="chart-title">TOTAL CLASES DE PRUEBA</h3><button class="btn-edit" onclick="openChartEditor('totalClasesPrueba')">editar</button></div>
+<div class="chart-body">
+<svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+<p class="chart-empty">Todavía no hay datos cargados.</p>
+<div class="chart-legend"></div>
+</div>
+</div>
+<div class="chart-card" data-chart-id="clasesVendidasPorEstilo">
+<div class="chart-card-header"><h3 class="chart-title">CLASES VENDIDAS POR ESTILO</h3><button class="btn-edit" onclick="openChartEditor('clasesVendidasPorEstilo')">editar</button></div>
+<div class="chart-body">
+<svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+<p class="chart-empty">Todavía no hay datos cargados.</p>
+<div class="chart-legend"></div>
+</div>
+</div>
 </div>
 </div><!-- MODAL EDICIÓN DE GRÁFICOS -->
 <div id="chart-edit-modal" class="chart-modal-overlay" onclick="closeChartEditor(event)">
@@ -569,6 +586,25 @@
  fields: [
  { key: 'manana', label: 'RENTA MAÑANA', color: '#3a3a38', step: '0.01' },
  { key: 'tarde', label: 'RENTA TARDE', color: '#b08d57', step: '0.01' }
+ ]
+ },
+ totalClasesPrueba: {
+ title: 'TOTAL CLASES DE PRUEBA',
+ fields: [
+ { key: 'clases', label: 'CLASES DE PRUEBA', color: '#3a3a38' },
+ { key: 'asistencias', label: 'ASISTENCIAS', color: '#b08d57' },
+ { key: 'vendidas', label: 'VENDIDAS', color: '#6b8f71' }
+ ]
+ },
+ clasesVendidasPorEstilo: {
+ title: 'CLASES VENDIDAS POR ESTILO',
+ fields: [
+ { key: 'taiChi', label: 'TAI CHI', color: '#3a3a38' },
+ { key: 'meditacion', label: 'MEDITACIÓN', color: '#b08d57' },
+ { key: 'ashtangaVinyasa', label: 'ASHTANGA VINYASA', color: '#6b8f71' },
+ { key: 'ashtangaMysore', label: 'ASHTANGA MYSORE', color: '#7a6b8f' },
+ { key: 'yogaSuave', label: 'YOGA SUAVE', color: '#b56b56' },
+ { key: 'hathaYoga', label: 'HATHA YOGA', color: '#4a7a8c' }
  ]
  }
  };
