@@ -127,16 +127,16 @@
  .admin-list .file-name { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.1em; color: #333; }
  .charts-grid {
  width: 100%;
- max-width: 720px;
+ max-width: 980px;
  display: flex;
  flex-direction: column;
- gap: 18px;
+ gap: 24px;
  }
  .chart-card {
  border: 1px solid #e0ddd9;
  border-radius: 3px;
  background: #fcfaf8;
- padding: 22px;
+ padding: 28px 30px;
  }
  .chart-card-header {
  display: flex;
@@ -146,15 +146,15 @@
  user-select: none;
  -webkit-tap-highlight-color: transparent;
  }
- .chart-card.open .chart-card-header { margin-bottom: 14px; }
+ .chart-card.open .chart-card-header { margin-bottom: 18px; }
  .chart-card-header-right {
  display: flex;
  align-items: center;
- gap: 12px;
+ gap: 14px;
  }
  .chart-arrow {
- width: 16px;
- height: 16px;
+ width: 18px;
+ height: 18px;
  color: #777;
  transition: transform 0.25s ease;
  flex-shrink: 0;
@@ -162,17 +162,17 @@
  .chart-card.open .chart-arrow { transform: rotate(180deg); }
  .chart-title {
  font-family: 'Montserrat', sans-serif;
- font-size: 0.72rem;
+ font-size: 0.88rem;
  font-weight: 500;
  letter-spacing: 0.14em;
  color: #222;
  }
  .btn-edit {
  font-family: 'Montserrat', sans-serif;
- font-size: 0.62rem;
+ font-size: 0.7rem;
  font-weight: 500;
  letter-spacing: 0.1em;
- padding: 7px 14px;
+ padding: 9px 16px;
  border-radius: 2px;
  border: 1px solid #3a3a38;
  background: transparent;
@@ -186,29 +186,29 @@
  .chart-svg { width: 100%; height: auto; display: block; }
  .chart-empty {
  font-family: 'Montserrat', sans-serif;
- font-size: 0.7rem;
+ font-size: 0.78rem;
  letter-spacing: 0.06em;
  color: #999;
  text-align: center;
- padding: 40px 0;
+ padding: 50px 0;
  }
  .chart-legend {
  display: flex;
  flex-wrap: wrap;
- gap: 10px 18px;
+ gap: 12px 22px;
  justify-content: center;
- margin-top: 10px;
+ margin-top: 14px;
  }
  .chart-legend-item {
  display: flex;
  align-items: center;
- gap: 6px;
+ gap: 7px;
  font-family: 'Montserrat', sans-serif;
- font-size: 0.62rem;
+ font-size: 0.72rem;
  letter-spacing: 0.08em;
  color: #555;
  }
- .chart-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+ .chart-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
  .chart-modal-overlay {
  display: none;
  position: fixed;
@@ -971,7 +971,7 @@
  const key = pieSelectedMonth[chartId];
  const rows = ((entries[key] || []).filter(r => r.categoria && Number(r.valor) > 0));
  const ns = 'http://www.w3.org/2000/svg';
- const cx = 320, cy = 150, r = 88;
+ const cx = 320, cy = 150, r = 102;
  if (rows.length === 0) {
  const msg = document.createElementNS(ns, 'text');
  msg.setAttribute('x', cx); msg.setAttribute('y', cy);
