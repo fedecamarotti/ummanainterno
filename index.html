@@ -286,6 +286,77 @@
  text-align: center;
  min-height: 0.9rem;
  }
+ .pie-edit-row {
+ display: flex;
+ gap: 8px;
+ align-items: center;
+ margin-bottom: 8px;
+ }
+ .pie-edit-row select {
+ flex: 1;
+ min-width: 0;
+ font-family: 'Montserrat', sans-serif;
+ font-size: 0.72rem;
+ padding: 9px 10px;
+ border: 1px solid #e0ddd9;
+ border-radius: 2px;
+ background: #fff;
+ color: #111;
+ outline: none;
+ }
+ .pie-edit-row input {
+ width: 80px;
+ flex-shrink: 0;
+ font-family: 'Montserrat', sans-serif;
+ font-size: 0.78rem;
+ padding: 9px 10px;
+ border: 1px solid #e0ddd9;
+ border-radius: 2px;
+ background: #fff;
+ color: #111;
+ outline: none;
+ }
+ .pie-row-remove {
+ flex-shrink: 0;
+ width: 28px;
+ height: 28px;
+ border-radius: 2px;
+ border: 1px solid #e0ddd9;
+ background: transparent;
+ color: #9a3030;
+ font-size: 0.9rem;
+ line-height: 1;
+ cursor: pointer;
+ }
+ .pie-row-remove:hover { background: #f4e5e5; }
+ .pie-row-add {
+ width: 100%;
+ font-family: 'Montserrat', sans-serif;
+ font-size: 0.66rem;
+ font-weight: 500;
+ letter-spacing: 0.08em;
+ padding: 10px;
+ margin-top: 2px;
+ border-radius: 2px;
+ border: 1px dashed #b0a89c;
+ background: transparent;
+ color: #555;
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ .pie-row-add:hover { background: #f4f2ef; }
+ .pie-month-selector { display: flex; justify-content: center; margin-bottom: 12px; }
+ .pie-month-select {
+ font-family: 'Montserrat', sans-serif;
+ font-size: 0.68rem;
+ letter-spacing: 0.06em;
+ padding: 8px 12px;
+ border: 1px solid #e0ddd9;
+ border-radius: 2px;
+ background: #fff;
+ color: #333;
+ outline: none;
+ }
  #img-modal {
  display: none;
  position: fixed;
@@ -554,6 +625,23 @@
 <div class="chart-legend"></div>
 </div>
 </div>
+<div class="chart-card" data-chart-id="ingresoInversionPautas">
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">INGRESO / INVERSIÓN PAUTAS</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('ingresoInversionPautas')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="chart-body">
+<svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+<p class="chart-empty">Todavía no hay datos cargados.</p>
+<div class="chart-legend"></div>
+</div>
+</div>
+<div class="chart-card" data-chart-id="detalleIngresoPautas">
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">DETALLE INGRESO POR PAUTAS</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('detalleIngresoPautas')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="chart-body">
+<div class="pie-month-selector"><select class="pie-month-select" onchange="onPieMonthChange('detalleIngresoPautas', this.value)"></select></div>
+<svg class="chart-svg" viewBox="0 0 320 300" preserveAspectRatio="xMidYMid meet"></svg>
+<p class="chart-empty">Todavía no hay datos cargados.</p>
+<div class="chart-legend"></div>
+</div>
+</div>
 </div>
 </div><!-- MODAL EDICIÓN DE GRÁFICOS -->
 <div id="chart-edit-modal" class="chart-modal-overlay" onclick="closeChartEditor(event)">
@@ -623,6 +711,30 @@
  { key: 'yogaSuave', label: 'YOGA SUAVE', color: '#b56b56' },
  { key: 'hathaYoga', label: 'HATHA YOGA', color: '#4a7a8c' }
  ]
+ },
+ ingresoInversionPautas: {
+ title: 'INGRESO / INVERSIÓN PAUTAS',
+ type: 'bar',
+ valueFormat: 'currency',
+ showValueLabels: true,
+ fields: [
+ { key: 'ingreso', label: 'INGRESO POR PAUTAS', color: '#6b8f71', step: '0.01' },
+ { key: 'inversion', label: 'INVERSIÓN PAUTAS', color: '#b56b56', step: '0.01' }
+ ]
+ },
+ detalleIngresoPautas: {
+ title: 'DETALLE INGRESO POR PAUTAS',
+ type: 'pie',
+ valueFormat: 'currency',
+ categories: [
+ 'BIENESTAR', 'COSMETOLOGÍA', 'CURSOS Y TALLERES', 'GASTROENTEROLOGÍA',
+ 'GINECOLOGÍA', 'KINESIOLOGÍA', 'MED. DEL DOLOR', 'MED. FUNCIONAL',
+ 'NUTRICIÓN', 'SUEÑO Y DESCANSO', 'SUEROTERAPIA', 'UROLOGÍA'
+ ],
+ categoryColors: [
+ '#3a3a38', '#b08d57', '#6b8f71', '#7a6b8f', '#b56b56', '#4a7a8c',
+ '#8c6b4a', '#5a7a4a', '#9c5a7a', '#4a5a8c', '#8c8c4a', '#6b4a5a'
+ ]
  }
  };
  // Formatea un número como moneda abreviada: 1.245.324,50 -> $1.2M | 950.342,23 -> $950K
@@ -644,6 +756,10 @@
  function formatChartValue(config, v) {
  const fmt = VALUE_FORMATTERS[config.valueFormat] || VALUE_FORMATTERS.number;
  return fmt(v);
+ }
+ function categoryColor(config, categoria) {
+ const idx = (config.categories || []).indexOf(categoria);
+ return idx >= 0 ? config.categoryColors[idx] : '#999';
  }
  const MONTHS = [
  { v: '01', l: 'ENERO' }, { v: '02', l: 'FEBRERO' }, { v: '03', l: 'MARZO' },
@@ -678,6 +794,7 @@
 
  function renderChart(chartId) {
  const config = CHARTS_CONFIG[chartId];
+ if (config.type === 'pie') { renderPieChart(chartId); return; }
  const card = document.querySelector(`.chart-card[data-chart-id="${chartId}"]`);
  if (!card) return;
  const svg = card.querySelector('.chart-svg');
@@ -703,9 +820,13 @@
  config.fields.forEach(f => { maxVal = Math.max(maxVal, Number(entries[k][f.key]) || 0); });
  });
  maxVal = maxVal === 0 ? 10 : Math.ceil(maxVal * 1.15);
+ const isBar = config.type === 'bar';
+ const groupWidth = plotW / keys.length;
  const xStep = keys.length > 1 ? plotW / (keys.length - 1) : 0;
  const yScale = v => padT + plotH - (v / maxVal) * plotH;
  const xScale = i => keys.length > 1 ? padL + i * xStep : padL + plotW / 2;
+ // en barras, cada mes ocupa un "grupo" centrado; en líneas, cada mes es un punto
+ const labelX = i => isBar ? padL + i * groupWidth + groupWidth / 2 : xScale(i);
  const ns = 'http://www.w3.org/2000/svg';
  // grilla horizontal
  for (let g = 0; g <= 4; g++) {
@@ -727,13 +848,46 @@
  const [y, m] = k.split('-');
  const monthLabel = (MONTHS.find(mm => mm.v === m) || {}).l || m;
  const label = document.createElementNS(ns, 'text');
- label.setAttribute('x', xScale(i)); label.setAttribute('y', H - padB + 18);
+ label.setAttribute('x', labelX(i)); label.setAttribute('y', H - padB + 18);
  label.setAttribute('text-anchor', 'middle'); label.setAttribute('font-size', '8.5');
  label.setAttribute('font-family', 'Montserrat, sans-serif'); label.setAttribute('fill', '#777');
  label.setAttribute('letter-spacing', '0.03em');
  label.textContent = `${monthLabel.slice(0,3)} ${y}`;
  svg.appendChild(label);
  });
+ if (isBar) {
+ // barras agrupadas por mes
+ const barGap = 6;
+ const barsPerGroup = config.fields.length;
+ const barWidth = Math.max(4, (groupWidth - barGap * (barsPerGroup + 1)) / barsPerGroup);
+ config.fields.forEach((f, fi) => {
+ keys.forEach((k, i) => {
+ const val = Number(entries[k][f.key]) || 0;
+ const groupX = padL + i * groupWidth;
+ const barX = groupX + barGap + fi * (barWidth + barGap);
+ const y = yScale(val);
+ const rect = document.createElementNS(ns, 'rect');
+ rect.setAttribute('x', barX); rect.setAttribute('y', y);
+ rect.setAttribute('width', barWidth); rect.setAttribute('height', (padT + plotH) - y);
+ rect.setAttribute('fill', f.color); rect.setAttribute('rx', '2');
+ svg.appendChild(rect);
+ if (config.showValueLabels && val > 0) {
+ const vLabel = document.createElementNS(ns, 'text');
+ vLabel.setAttribute('x', barX + barWidth / 2);
+ vLabel.setAttribute('y', y - 7);
+ vLabel.setAttribute('text-anchor', 'middle'); vLabel.setAttribute('font-size', '8');
+ vLabel.setAttribute('font-family', 'Montserrat, sans-serif'); vLabel.setAttribute('font-weight', '600');
+ vLabel.setAttribute('fill', f.color);
+ vLabel.textContent = formatChartValue(config, val);
+ svg.appendChild(vLabel);
+ }
+ });
+ const item = document.createElement('div');
+ item.className = 'chart-legend-item';
+ item.innerHTML = `<span class="chart-legend-dot" style="background:${f.color}"></span>${f.label}`;
+ legend.appendChild(item);
+ });
+ } else {
  // líneas por campo
  config.fields.forEach(f => {
  const points = keys.map((k, i) => `${xScale(i)},${yScale(Number(entries[k][f.key]) || 0)}`).join(' ');
@@ -767,6 +921,100 @@
  legend.appendChild(item);
  });
  }
+ }
+
+ // ===== GRÁFICO DE TORTA (mes seleccionable) =====
+ const pieSelectedMonth = {};
+ function populatePieMonthSelect(chartId) {
+ const config = CHARTS_CONFIG[chartId];
+ const card = document.querySelector(`.chart-card[data-chart-id="${chartId}"]`);
+ const select = card.querySelector('.pie-month-select');
+ const entries = chartsData[chartId] || {};
+ const keys = Object.keys(entries).sort();
+ select.innerHTML = keys.map(k => {
+ const [y, m] = k.split('-');
+ const monthLabel = (MONTHS.find(mm => mm.v === m) || {}).l || m;
+ return `<option value="${k}">${monthLabel} ${y}</option>`;
+ }).join('');
+ if (!pieSelectedMonth[chartId] || !keys.includes(pieSelectedMonth[chartId])) {
+ pieSelectedMonth[chartId] = keys[keys.length - 1];
+ }
+ select.value = pieSelectedMonth[chartId];
+ }
+ function onPieMonthChange(chartId, key) {
+ pieSelectedMonth[chartId] = key;
+ renderPieChart(chartId);
+ }
+ function renderPieChart(chartId) {
+ const config = CHARTS_CONFIG[chartId];
+ const card = document.querySelector(`.chart-card[data-chart-id="${chartId}"]`);
+ if (!card) return;
+ const svg = card.querySelector('.chart-svg');
+ const empty = card.querySelector('.chart-empty');
+ const legend = card.querySelector('.chart-legend');
+ const monthSelector = card.querySelector('.pie-month-selector');
+ const entries = chartsData[chartId] || {};
+ const keys = Object.keys(entries).sort();
+ svg.innerHTML = '';
+ legend.innerHTML = '';
+ if (keys.length === 0) {
+ empty.style.display = 'block';
+ svg.style.display = 'none';
+ legend.style.display = 'none';
+ monthSelector.style.display = 'none';
+ return;
+ }
+ populatePieMonthSelect(chartId);
+ empty.style.display = 'none';
+ svg.style.display = 'block';
+ legend.style.display = 'flex';
+ monthSelector.style.display = 'block';
+ const key = pieSelectedMonth[chartId];
+ const rows = ((entries[key] || []).filter(r => r.categoria && Number(r.valor) > 0));
+ const ns = 'http://www.w3.org/2000/svg';
+ if (rows.length === 0) {
+ const msg = document.createElementNS(ns, 'text');
+ msg.setAttribute('x', 200); msg.setAttribute('y', 160);
+ msg.setAttribute('text-anchor', 'middle'); msg.setAttribute('font-size', '10');
+ msg.setAttribute('font-family', 'Montserrat, sans-serif'); msg.setAttribute('fill', '#999');
+ msg.textContent = 'Sin datos para este mes.';
+ svg.appendChild(msg);
+ return;
+ }
+ const total = rows.reduce((s, r) => s + Number(r.valor), 0);
+ const cx = 160, cy = 150, r = 110;
+ let startAngle = 0;
+ const polar = (angleDeg) => {
+ const rad = (angleDeg - 90) * Math.PI / 180;
+ return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+ };
+ rows.forEach(row => {
+ const val = Number(row.valor);
+ const angle = total > 0 ? (val / total) * 360 : 0;
+ const endAngle = startAngle + angle;
+ const p1 = polar(startAngle), p2 = polar(endAngle);
+ const largeArc = angle > 180 ? 1 : 0;
+ const path = document.createElementNS(ns, 'path');
+ const color = categoryColor(config, row.categoria);
+ if (rows.length === 1) {
+ const circle = document.createElementNS(ns, 'circle');
+ circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+ circle.setAttribute('fill', color);
+ svg.appendChild(circle);
+ } else {
+ path.setAttribute('d', `M ${cx} ${cy} L ${p1.x} ${p1.y} A ${r} ${r} 0 ${largeArc} 1 ${p2.x} ${p2.y} Z`);
+ path.setAttribute('fill', color);
+ path.setAttribute('stroke', '#fcfaf8'); path.setAttribute('stroke-width', '1.5');
+ svg.appendChild(path);
+ }
+ startAngle = endAngle;
+ const item = document.createElement('div');
+ item.className = 'chart-legend-item';
+ const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+ item.innerHTML = `<span class="chart-legend-dot" style="background:${color}"></span>${row.categoria} — ${formatChartValue(config, val)} (${pct}%)`;
+ legend.appendChild(item);
+ });
+ }
 
  function populateYearMonthSelects() {
  const yearSel = document.getElementById('chart-year');
@@ -785,11 +1033,59 @@
  });
  }
 
+ // ===== EDICIÓN DE FILAS DINÁMICAS (gráfico de torta) =====
+ let pieEditRows = [];
+ function renderPieEditRows() {
+ const config = CHARTS_CONFIG[currentEditingChart];
+ const container = document.getElementById('chart-modal-fields');
+ const rowsHtml = pieEditRows.map((row, i) => `
+ <div class="pie-edit-row">
+ <select onchange="updatePieRow(${i}, 'categoria', this.value)">
+ <option value="">elegí...</option>
+ ${config.categories.map(c => `<option value="${c}" ${row.categoria === c ? 'selected' : ''}>${c}</option>`).join('')}
+ </select>
+ <input type="number" min="0" step="0.01" placeholder="0" value="${row.valor !== undefined && row.valor !== '' ? row.valor : ''}" oninput="updatePieRow(${i}, 'valor', this.value)" />
+ <button type="button" class="pie-row-remove" onclick="removePieRow(${i})" aria-label="quitar">×</button>
+ </div>
+ `).join('');
+ container.innerHTML = rowsHtml + `<button type="button" class="pie-row-add" onclick="addPieRow()">+ agregar rubro</button>`;
+ }
+ function addPieRow() {
+ pieEditRows.push({ categoria: '', valor: '' });
+ renderPieEditRows();
+ }
+ function removePieRow(i) {
+ pieEditRows.splice(i, 1);
+ if (pieEditRows.length === 0) pieEditRows.push({ categoria: '', valor: '' });
+ renderPieEditRows();
+ }
+ function updatePieRow(i, field, value) {
+ if (!pieEditRows[i]) return;
+ pieEditRows[i][field] = value;
+ }
+ function fillPieRowsFromEntry(chartId, year, month) {
+ const key = `${year}-${month}`;
+ const existing = (chartsData[chartId] || {})[key];
+ pieEditRows = existing && existing.length ? existing.map(r => ({ categoria: r.categoria, valor: r.valor })) : [{ categoria: '', valor: '' }];
+ renderPieEditRows();
+ }
+
  function openChartEditor(chartId) {
  currentEditingChart = chartId;
  const config = CHARTS_CONFIG[chartId];
  document.getElementById('chart-modal-title').textContent = config.title;
  document.getElementById('chart-modal-status').textContent = '';
+ const now = new Date();
+ const yearSel = document.getElementById('chart-year');
+ const monthSel = document.getElementById('chart-month');
+ yearSel.value = String(now.getFullYear());
+ monthSel.value = String(now.getMonth() + 1).padStart(2, '0');
+ if (!yearSel.value) yearSel.selectedIndex = 0;
+ if (config.type === 'pie') {
+ fillPieRowsFromEntry(chartId, yearSel.value, monthSel.value);
+ yearSel.onchange = () => fillPieRowsFromEntry(chartId, yearSel.value, monthSel.value);
+ monthSel.onchange = () => fillPieRowsFromEntry(chartId, yearSel.value, monthSel.value);
+ } else {
  const fieldsContainer = document.getElementById('chart-modal-fields');
  fieldsContainer.innerHTML = config.fields.map(f => `
  <div class="chart-field">
@@ -797,15 +1093,10 @@
  <input type="number" min="0" step="${f.step || '1'}" id="chart-field-${f.key}" placeholder="0" />
  </div>
  `).join('');
- const now = new Date();
- const yearSel = document.getElementById('chart-year');
- const monthSel = document.getElementById('chart-month');
- yearSel.value = String(now.getFullYear());
- monthSel.value = String(now.getMonth() + 1).padStart(2, '0');
- if (!yearSel.value) yearSel.selectedIndex = 0;
  fillFieldsFromEntry(chartId, yearSel.value, monthSel.value);
  yearSel.onchange = () => fillFieldsFromEntry(chartId, yearSel.value, monthSel.value);
  monthSel.onchange = () => fillFieldsFromEntry(chartId, yearSel.value, monthSel.value);
+ }
  document.getElementById('chart-edit-modal').classList.add('open');
  }
 
@@ -823,11 +1114,18 @@
  const month = document.getElementById('chart-month').value;
  const key = `${year}-${month}`;
  const status = document.getElementById('chart-modal-status');
- const entry = {};
+ let entry;
+ if (config.type === 'pie') {
+ entry = pieEditRows
+ .filter(r => r.categoria && r.valor !== '' && r.valor !== undefined)
+ .map(r => ({ categoria: r.categoria, valor: Number(r.valor) || 0 }));
+ } else {
+ entry = {};
  config.fields.forEach(f => {
  const val = document.getElementById(`chart-field-${f.key}`).value;
  entry[f.key] = val === '' ? 0 : Number(val);
  });
+ }
  status.textContent = 'guardando...';
  status.style.color = '#777';
  try {
@@ -836,6 +1134,7 @@
  const savePromise = setDoc(doc(db, 'adminCharts', chartId), { entries: chartsData[chartId] }, { merge: true });
  const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('tiempo de espera agotado')), 12000));
  await Promise.race([savePromise, timeoutPromise]);
+ if (config.type === 'pie') { pieSelectedMonth[chartId] = key; }
  renderChart(chartId);
  closeChartEditor();
  } catch (e) {
@@ -854,6 +1153,10 @@
  window.closeChartEditor = closeChartEditor;
  window.saveChartEntry = saveChartEntry;
  window.toggleChartCard = toggleChartCard;
+ window.addPieRow = addPieRow;
+ window.removePieRow = removePieRow;
+ window.updatePieRow = updatePieRow;
+ window.onPieMonthChange = onPieMonthChange;
  populateYearMonthSelects();
 
  function getRoleFromEmail(email) {
