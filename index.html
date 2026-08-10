@@ -142,8 +142,24 @@
  display: flex;
  align-items: center;
  justify-content: space-between;
- margin-bottom: 14px;
+ cursor: pointer;
+ user-select: none;
+ -webkit-tap-highlight-color: transparent;
  }
+ .chart-card.open .chart-card-header { margin-bottom: 14px; }
+ .chart-card-header-right {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ }
+ .chart-arrow {
+ width: 16px;
+ height: 16px;
+ color: #777;
+ transition: transform 0.25s ease;
+ flex-shrink: 0;
+ }
+ .chart-card.open .chart-arrow { transform: rotate(180deg); }
  .chart-title {
  font-family: 'Montserrat', sans-serif;
  font-size: 0.72rem;
@@ -165,7 +181,8 @@
  transition: background 0.2s, color 0.2s;
  }
  .btn-edit:hover { background: #3a3a38; color: #fcfaf8; }
- .chart-body { position: relative; }
+ .chart-body { position: relative; display: none; }
+ .chart-card.open .chart-body { display: block; }
  .chart-svg { width: 100%; height: auto; display: block; }
  .chart-empty {
  font-family: 'Montserrat', sans-serif;
@@ -506,7 +523,7 @@
 <!-- LOGIN --><div id="login-screen"><img src="image/logoummanabc.png" alt="ummana" /><div id="login-form"><input type="email" id="username" placeholder="email" autocomplete="off" /><input type="password" id="password" placeholder="contraseña" /><button onclick="handleLogin()">ingresar</button><p id="error-msg">usuario o contraseña incorrectos</p></div></div><!-- ADMIN -->
 <div id="admin-screen"><img src="image/logoummanabc.png" alt="ummana" /><div class="charts-grid" id="charts-grid">
 <div class="chart-card" data-chart-id="sueroterapiaPacientes">
-<div class="chart-card-header"><h3 class="chart-title">SUEROTERAPIA PACIENTES</h3><button class="btn-edit" onclick="openChartEditor('sueroterapiaPacientes')">editar</button></div>
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">SUEROTERAPIA PACIENTES</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('sueroterapiaPacientes')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
 <div class="chart-body">
 <svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
 <p class="chart-empty">Todavía no hay datos cargados.</p>
@@ -514,7 +531,7 @@
 </div>
 </div>
 <div class="chart-card" data-chart-id="sueroterapiaRenta">
-<div class="chart-card-header"><h3 class="chart-title">SUEROTERAPIA RENTA</h3><button class="btn-edit" onclick="openChartEditor('sueroterapiaRenta')">editar</button></div>
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">SUEROTERAPIA RENTA</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('sueroterapiaRenta')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
 <div class="chart-body">
 <svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
 <p class="chart-empty">Todavía no hay datos cargados.</p>
@@ -522,7 +539,7 @@
 </div>
 </div>
 <div class="chart-card" data-chart-id="totalClasesPrueba">
-<div class="chart-card-header"><h3 class="chart-title">TOTAL CLASES DE PRUEBA</h3><button class="btn-edit" onclick="openChartEditor('totalClasesPrueba')">editar</button></div>
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">TOTAL CLASES DE PRUEBA</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('totalClasesPrueba')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
 <div class="chart-body">
 <svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
 <p class="chart-empty">Todavía no hay datos cargados.</p>
@@ -530,7 +547,7 @@
 </div>
 </div>
 <div class="chart-card" data-chart-id="clasesVendidasPorEstilo">
-<div class="chart-card-header"><h3 class="chart-title">CLASES VENDIDAS POR ESTILO</h3><button class="btn-edit" onclick="openChartEditor('clasesVendidasPorEstilo')">editar</button></div>
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">CLASES VENDIDAS POR ESTILO</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('clasesVendidasPorEstilo')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
 <div class="chart-body">
 <svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
 <p class="chart-empty">Todavía no hay datos cargados.</p>
@@ -828,9 +845,15 @@
  }
  }
 
+ function toggleChartCard(headerEl) {
+ const card = headerEl.closest('.chart-card');
+ if (card) card.classList.toggle('open');
+ }
+
  window.openChartEditor = openChartEditor;
  window.closeChartEditor = closeChartEditor;
  window.saveChartEntry = saveChartEntry;
+ window.toggleChartCard = toggleChartCard;
  populateYearMonthSelects();
 
  function getRoleFromEmail(email) {
