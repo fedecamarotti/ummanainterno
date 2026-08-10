@@ -512,6 +512,14 @@
 <div class="chart-legend"></div>
 </div>
 </div>
+<div class="chart-card" data-chart-id="sueroterapiaRenta">
+<div class="chart-card-header"><h3 class="chart-title">SUEROTERAPIA RENTA</h3><button class="btn-edit" onclick="openChartEditor('sueroterapiaRenta')">editar</button></div>
+<div class="chart-body">
+<svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+<p class="chart-empty">Todavía no hay datos cargados.</p>
+<div class="chart-legend"></div>
+</div>
+</div>
 </div>
 </div><!-- MODAL EDICIÓN DE GRÁFICOS -->
 <div id="chart-edit-modal" class="chart-modal-overlay" onclick="closeChartEditor(event)">
@@ -553,8 +561,36 @@
  { key: 'manana', label: 'PACIENTES MAÑANA', color: '#3a3a38' },
  { key: 'tarde', label: 'PACIENTES TARDE', color: '#b08d57' }
  ]
+ },
+ sueroterapiaRenta: {
+ title: 'SUEROTERAPIA RENTA',
+ valueFormat: 'currency',
+ showValueLabels: true,
+ fields: [
+ { key: 'monto', label: 'RENTA ($)', color: '#3a3a38', step: '0.01' }
+ ]
  }
  };
+ // Formatea un número como moneda abreviada: 1.245.324,50 -> $1.2M | 950.342,23 -> $950K
+ function formatCurrencyAbbrev(value) {
+ const num = Number(value) || 0;
+ const sign = num < 0 ? '-' : '';
+ const abs = Math.abs(num);
+ if (abs >= 1000000) {
+ let m = (abs / 1000000).toFixed(1).replace(/\.0$/, '');
+ return sign + '$' + m + 'M';
+ }
+ if (abs >= 1000) return sign + '$' + Math.round(abs / 1000) + 'K';
+ return sign + '$' + Math.round(abs);
+ }
+ const VALUE_FORMATTERS = {
+ number: v => String(Math.round(Number(v) || 0)),
+ currency: formatCurrencyAbbrev
+ };
+ function formatChartValue(config, v) {
+ const fmt = VALUE_FORMATTERS[config.valueFormat] || VALUE_FORMATTERS.number;
+ return fmt(v);
+ }
  const MONTHS = [
  { v: '01', l: 'ENERO' }, { v: '02', l: 'FEBRERO' }, { v: '03', l: 'MARZO' },
  { v: '04', l: 'ABRIL' }, { v: '05', l: 'MAYO' }, { v: '06', l: 'JUNIO' },
@@ -566,9 +602,18 @@
  let currentEditingChart = null;
 
  async function loadChartData(chartId) {
+ try {
  const snap = await getDoc(doc(db, 'adminCharts', chartId));
  chartsData[chartId] = snap.exists() ? (snap.data().entries || {}) : {};
  renderChart(chartId);
+ } catch (e) {
+ console.error('Error cargando el gráfico', chartId, e);
+ const card = document.querySelector(`.chart-card[data-chart-id="${chartId}"]`);
+ if (card) {
+ const empty = card.querySelector('.chart-empty');
+ if (empty) { empty.textContent = 'No se pudo cargar el gráfico (' + (e.code || e.message) + ')'; empty.style.display = 'block'; }
+ }
+ }
  }
 
  async function loadAllCharts() {
@@ -620,7 +665,7 @@
  label.setAttribute('x', padL - 8); label.setAttribute('y', y + 3);
  label.setAttribute('text-anchor', 'end'); label.setAttribute('font-size', '9');
  label.setAttribute('font-family', 'Montserrat, sans-serif'); label.setAttribute('fill', '#999');
- label.textContent = Math.round(maxVal - (maxVal / 4) * g);
+ label.textContent = formatChartValue(config, maxVal - (maxVal / 4) * g);
  svg.appendChild(label);
  }
  // etiquetas eje X
@@ -651,6 +696,16 @@
  c.setAttribute('cx', xScale(i)); c.setAttribute('cy', yScale(Number(entries[k][f.key]) || 0));
  c.setAttribute('r', '3'); c.setAttribute('fill', f.color);
  svg.appendChild(c);
+ if (config.showValueLabels) {
+ const vLabel = document.createElementNS(ns, 'text');
+ vLabel.setAttribute('x', xScale(i));
+ vLabel.setAttribute('y', yScale(Number(entries[k][f.key]) || 0) - 10);
+ vLabel.setAttribute('text-anchor', 'middle'); vLabel.setAttribute('font-size', '8.5');
+ vLabel.setAttribute('font-family', 'Montserrat, sans-serif'); vLabel.setAttribute('font-weight', '600');
+ vLabel.setAttribute('fill', f.color);
+ vLabel.textContent = formatChartValue(config, entries[k][f.key]);
+ svg.appendChild(vLabel);
+ }
  });
  const item = document.createElement('div');
  item.className = 'chart-legend-item';
@@ -685,7 +740,7 @@
  fieldsContainer.innerHTML = config.fields.map(f => `
  <div class="chart-field">
  <label>${f.label}</label>
- <input type="number" min="0" id="chart-field-${f.key}" placeholder="0" />
+ <input type="number" min="0" step="${f.step || '1'}" id="chart-field-${f.key}" placeholder="0" />
  </div>
  `).join('');
  const now = new Date();
@@ -724,11 +779,14 @@
  try {
  chartsData[chartId] = chartsData[chartId] || {};
  chartsData[chartId][key] = entry;
- await setDoc(doc(db, 'adminCharts', chartId), { entries: chartsData[chartId] }, { merge: true });
+ const savePromise = setDoc(doc(db, 'adminCharts', chartId), { entries: chartsData[chartId] }, { merge: true });
+ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('tiempo de espera agotado')), 12000));
+ await Promise.race([savePromise, timeoutPromise]);
  renderChart(chartId);
  closeChartEditor();
  } catch (e) {
- status.textContent = 'error al guardar, intentá de nuevo';
+ console.error('Error guardando el gráfico', chartId, e);
+ status.textContent = 'error al guardar: ' + (e.code || e.message || 'desconocido');
  status.style.color = '#9a3030';
  }
  }
