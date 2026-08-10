@@ -637,7 +637,7 @@
 <div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">DETALLE INGRESO POR PAUTAS</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('detalleIngresoPautas')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
 <div class="chart-body">
 <div class="pie-month-selector"><select class="pie-month-select" onchange="onPieMonthChange('detalleIngresoPautas', this.value)"></select></div>
-<svg class="chart-svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet"></svg>
+<svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
 <p class="chart-empty">Todavía no hay datos cargados.</p>
 <div class="chart-legend"></div>
 </div>
@@ -971,7 +971,7 @@
  const key = pieSelectedMonth[chartId];
  const rows = ((entries[key] || []).filter(r => r.categoria && Number(r.valor) > 0));
  const ns = 'http://www.w3.org/2000/svg';
- const cx = 300, cy = 190, r = 52;
+ const cx = 320, cy = 150, r = 88;
  if (rows.length === 0) {
  const msg = document.createElementNS(ns, 'text');
  msg.setAttribute('x', cx); msg.setAttribute('y', cy);
