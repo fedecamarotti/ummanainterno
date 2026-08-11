@@ -982,18 +982,19 @@
  return;
  }
  const total = rows.reduce((s, r) => s + Number(r.valor), 0);
- let startAngle = 0;
  const polarAt = (radius, angleDeg) => {
  const rad = (angleDeg - 90) * Math.PI / 180;
  return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
  };
+ // 1) dibujar las porciones y juntar los datos de etiqueta (todavía sin acomodar solapes)
+ let startAngle = 0;
+ const labelData = [];
  rows.forEach(row => {
  const val = Number(row.valor);
  const angle = total > 0 ? (val / total) * 360 : 0;
  const endAngle = startAngle + angle;
  const midAngle = startAngle + angle / 2;
  const color = categoryColor(config, row.categoria);
- // porción
  if (rows.length === 1) {
  const circle = document.createElementNS(ns, 'circle');
  circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
@@ -1008,34 +1009,60 @@
  path.setAttribute('stroke', '#fcfaf8'); path.setAttribute('stroke-width', '1.5');
  svg.appendChild(path);
  }
- // línea guía + etiqueta afuera de la torta
  const edge = polarAt(r, midAngle);
- const elbow = polarAt(r + 16, midAngle);
- const dir = elbow.x >= cx ? 1 : -1;
- const tip = { x: elbow.x + dir * 22, y: elbow.y };
+ const nub = polarAt(r + 14, midAngle);
+ const side = nub.x >= cx ? 1 : -1;
+ const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+ labelData.push({
+ edge, nub, side,
+ targetX: cx + side * 182,
+ naturalY: nub.y,
+ finalY: nub.y,
+ color, name: row.categoria,
+ valueText: `${formatChartValue(config, val)} (${pct}%)`
+ });
+ startAngle = endAngle;
+ });
+ // 2) acomodar solapes verticales entre etiquetas del mismo lado (izquierda / derecha)
+ const minY = 26, maxY = 274, minGap = 24;
+ [1, -1].forEach(side => {
+ const group = labelData.filter(l => l.side === side).sort((a, b) => a.naturalY - b.naturalY);
+ if (group.length === 0) return;
+ group.forEach(l => { l.finalY = Math.min(Math.max(l.naturalY, minY), maxY); });
+ for (let i = 1; i < group.length; i++) {
+ if (group[i].finalY - group[i - 1].finalY < minGap) group[i].finalY = group[i - 1].finalY + minGap;
+ }
+ if (group[group.length - 1].finalY > maxY) {
+ group[group.length - 1].finalY = maxY;
+ for (let i = group.length - 2; i >= 0; i--) {
+ if (group[i + 1].finalY - group[i].finalY < minGap) group[i].finalY = group[i + 1].finalY - minGap;
+ }
+ }
+ });
+ // 3) dibujar las líneas guía (con quiebre) y el texto, ya sin solapes
+ labelData.forEach(l => {
+ const bendX = cx + l.side * (r + 32);
  const guide = document.createElementNS(ns, 'polyline');
- guide.setAttribute('points', `${edge.x},${edge.y} ${elbow.x},${elbow.y} ${tip.x},${tip.y}`);
+ guide.setAttribute('points', `${l.edge.x},${l.edge.y} ${l.nub.x},${l.nub.y} ${bendX},${l.finalY} ${l.targetX},${l.finalY}`);
  guide.setAttribute('fill', 'none');
- guide.setAttribute('stroke', color);
+ guide.setAttribute('stroke', l.color);
  guide.setAttribute('stroke-width', '1');
  svg.appendChild(guide);
- const pct = total > 0 ? Math.round((val / total) * 100) : 0;
  const nameLabel = document.createElementNS(ns, 'text');
- nameLabel.setAttribute('x', tip.x); nameLabel.setAttribute('y', tip.y - 4);
+ nameLabel.setAttribute('x', l.targetX); nameLabel.setAttribute('y', l.finalY - 4);
  nameLabel.setAttribute('text-anchor', 'middle'); nameLabel.setAttribute('font-size', '8.5');
  nameLabel.setAttribute('font-family', 'Montserrat, sans-serif'); nameLabel.setAttribute('font-weight', '600');
  nameLabel.setAttribute('letter-spacing', '0.04em');
  nameLabel.setAttribute('fill', '#333');
- nameLabel.textContent = row.categoria;
+ nameLabel.textContent = l.name;
  svg.appendChild(nameLabel);
  const valueLabel = document.createElementNS(ns, 'text');
- valueLabel.setAttribute('x', tip.x); valueLabel.setAttribute('y', tip.y + 8);
+ valueLabel.setAttribute('x', l.targetX); valueLabel.setAttribute('y', l.finalY + 8);
  valueLabel.setAttribute('text-anchor', 'middle'); valueLabel.setAttribute('font-size', '8');
  valueLabel.setAttribute('font-family', 'Montserrat, sans-serif'); valueLabel.setAttribute('font-weight', '500');
- valueLabel.setAttribute('fill', color);
- valueLabel.textContent = `${formatChartValue(config, val)} (${pct}%)`;
+ valueLabel.setAttribute('fill', l.color);
+ valueLabel.textContent = l.valueText;
  svg.appendChild(valueLabel);
- startAngle = endAngle;
  });
  }
 
