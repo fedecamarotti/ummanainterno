@@ -692,16 +692,17 @@
  valueFormat: 'currency',
  showValueLabels: true,
  categories: [
- 'ALQUILERES', 'CLASES (+ talleres recurrentes)',
- 'OFICIOS (encuadernación, alfarería, puntillismo, etc.)',
+ 'ALQUILERES', 'CLASES', 'OFICIOS', 'JORNADAS',
  'SUEROS', 'SUPLEMENTACIÓN', 'CREMAS', 'COLÁGENOS'
  ],
  categoryColors: [
- '#4a7ba3', '#5f8f6b', '#c98fa0', '#cf6a54', '#d4ac54', '#8672a8', '#6f8299'
+ '#4a7ba3', '#5f8f6b', '#c98fa0', '#c9a24b',
+ '#c1704f', '#8672a8', '#4f9098', '#6f8299'
  ]
  },
  sueroterapiaPacientes: {
  title: 'SUEROTERAPIA PACIENTES',
+ type: 'bar',
  fields: [
  { key: 'manana', label: 'PACIENTES MAÑANA', color: '#3a3a38' },
  { key: 'tarde', label: 'PACIENTES TARDE', color: '#b08d57' }
@@ -709,6 +710,7 @@
  },
  sueroterapiaRenta: {
  title: 'SUEROTERAPIA RENTA',
+ type: 'bar',
  valueFormat: 'currency',
  showValueLabels: true,
  fields: [
@@ -718,6 +720,7 @@
  },
  totalClasesPrueba: {
  title: 'TOTAL CLASES DE PRUEBA',
+ type: 'bar',
  fields: [
  { key: 'clases', label: 'CLASES DE PRUEBA', color: '#3a3a38' },
  { key: 'asistencias', label: 'ASISTENCIAS', color: '#b08d57' },
@@ -726,6 +729,7 @@
  },
  clasesVendidasPorEstilo: {
  title: 'CLASES VENDIDAS POR ESTILO',
+ type: 'bar',
  fields: [
  { key: 'taiChi', label: 'TAI CHI', color: '#3a3a38' },
  { key: 'meditacion', label: 'MEDITACIÓN', color: '#b08d57' },
@@ -880,15 +884,20 @@
  svg.appendChild(label);
  });
  if (isBar) {
- // barras agrupadas por mes
+ // barras agrupadas por mes (finas, centradas, con separación entre meses)
  const barGap = 6;
  const barsPerGroup = config.fields.length;
- const barWidth = Math.max(4, (groupWidth - barGap * (barsPerGroup + 1)) / barsPerGroup);
+ const groupPadding = groupWidth * 0.1;
+ const usableWidth = groupWidth - groupPadding;
+ const naturalBarWidth = Math.max(4, (usableWidth - barGap * (barsPerGroup - 1)) / barsPerGroup);
+ const barWidth = Math.max(3, naturalBarWidth * 0.6);
+ const clusterWidth = barsPerGroup * barWidth + (barsPerGroup - 1) * barGap;
  config.fields.forEach((f, fi) => {
  keys.forEach((k, i) => {
  const val = Number(entries[k][f.key]) || 0;
  const groupX = padL + i * groupWidth;
- const barX = groupX + barGap + fi * (barWidth + barGap);
+ const startX = groupX + (groupWidth - clusterWidth) / 2;
+ const barX = startX + fi * (barWidth + barGap);
  const y = yScale(val);
  const rect = document.createElementNS(ns, 'rect');
  rect.setAttribute('x', barX); rect.setAttribute('y', y);
