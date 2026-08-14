@@ -127,16 +127,16 @@
  .admin-list .file-name { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.1em; color: #333; }
  .charts-grid {
  width: 100%;
- max-width: 980px;
+ max-width: 882px;
  display: flex;
  flex-direction: column;
- gap: 24px;
+ gap: 22px;
  }
  .chart-card {
  border: 1px solid #e0ddd9;
  border-radius: 3px;
  background: #fcfaf8;
- padding: 28px 30px;
+ padding: 25px 27px;
  }
  .chart-card-header {
  display: flex;
@@ -146,15 +146,15 @@
  user-select: none;
  -webkit-tap-highlight-color: transparent;
  }
- .chart-card.open .chart-card-header { margin-bottom: 18px; }
+ .chart-card.open .chart-card-header { margin-bottom: 16px; }
  .chart-card-header-right {
  display: flex;
  align-items: center;
- gap: 14px;
+ gap: 13px;
  }
  .chart-arrow {
- width: 18px;
- height: 18px;
+ width: 16px;
+ height: 16px;
  color: #777;
  transition: transform 0.25s ease;
  flex-shrink: 0;
@@ -162,17 +162,17 @@
  .chart-card.open .chart-arrow { transform: rotate(180deg); }
  .chart-title {
  font-family: 'Montserrat', sans-serif;
- font-size: 0.88rem;
+ font-size: 0.79rem;
  font-weight: 500;
  letter-spacing: 0.14em;
  color: #222;
  }
  .btn-edit {
  font-family: 'Montserrat', sans-serif;
- font-size: 0.7rem;
+ font-size: 0.63rem;
  font-weight: 500;
  letter-spacing: 0.1em;
- padding: 9px 16px;
+ padding: 8px 14px;
  border-radius: 2px;
  border: 1px solid #3a3a38;
  background: transparent;
@@ -186,29 +186,50 @@
  .chart-svg { width: 100%; height: auto; display: block; }
  .chart-empty {
  font-family: 'Montserrat', sans-serif;
- font-size: 0.78rem;
+ font-size: 0.7rem;
  letter-spacing: 0.06em;
  color: #999;
  text-align: center;
- padding: 50px 0;
+ padding: 45px 0;
  }
  .chart-legend {
  display: flex;
  flex-wrap: wrap;
- gap: 12px 22px;
+ gap: 11px 20px;
  justify-content: center;
- margin-top: 14px;
+ margin-top: 13px;
  }
  .chart-legend-item {
  display: flex;
  align-items: center;
- gap: 7px;
+ gap: 6px;
  font-family: 'Montserrat', sans-serif;
- font-size: 0.72rem;
+ font-size: 0.65rem;
  letter-spacing: 0.08em;
  color: #555;
  }
- .chart-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+ .chart-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+ @media (max-width: 600px) {
+ .charts-grid { gap: 14px; }
+ .chart-card { padding: 15px 14px; border-radius: 4px; }
+ .chart-card.open .chart-card-header { margin-bottom: 10px; }
+ .chart-card-header-right { gap: 8px; }
+ .chart-arrow { width: 13px; height: 13px; }
+ .chart-title { font-size: 0.6rem; letter-spacing: 0.09em; }
+ .btn-edit { font-size: 0.52rem; padding: 6px 10px; letter-spacing: 0.06em; }
+ .chart-empty { font-size: 0.6rem; padding: 30px 0; }
+ .chart-legend { gap: 6px 12px; margin-top: 9px; }
+ .chart-legend-item { font-size: 0.54rem; gap: 4px; letter-spacing: 0.04em; }
+ .chart-legend-dot { width: 7px; height: 7px; }
+ .chart-modal { max-width: 88vw; padding: 22px 18px; }
+ .chart-modal-title { font-size: 0.62rem; }
+ .chart-field label { font-size: 0.52rem; }
+ .chart-field select, .chart-field input { font-size: 0.7rem; padding: 8px 10px; }
+ .pie-edit-row select { font-size: 0.62rem; padding: 7px 8px; }
+ .pie-edit-row input { font-size: 0.68rem; width: 66px; padding: 7px 8px; }
+ .pie-row-add { font-size: 0.56rem; padding: 8px; }
+ .pie-month-select { font-size: 0.58rem; padding: 6px 10px; }
+ }
  .chart-modal-overlay {
  display: none;
  position: fixed;
@@ -703,9 +724,10 @@
  sueroterapiaPacientes: {
  title: 'SUEROTERAPIA PACIENTES',
  type: 'bar',
+ showValueLabels: true,
  fields: [
- { key: 'manana', label: 'PACIENTES MAÑANA', color: '#e6d9b8' },
- { key: 'tarde', label: 'PACIENTES TARDE', color: '#8fbf9f' }
+ { key: 'manana', label: 'PACIENTES MAÑANA', color: '#c9a55c' },
+ { key: 'tarde', label: 'PACIENTES TARDE', color: '#5f9e78' }
  ]
  },
  sueroterapiaRenta: {
@@ -714,28 +736,28 @@
  valueFormat: 'currency',
  showValueLabels: true,
  fields: [
- { key: 'manana', label: 'RENTA MAÑANA', color: '#e6d9b8', step: '0.01' },
- { key: 'tarde', label: 'RENTA TARDE', color: '#8fbf9f', step: '0.01' }
+ { key: 'manana', label: 'RENTA MAÑANA', color: '#c9a55c', step: '0.01' },
+ { key: 'tarde', label: 'RENTA TARDE', color: '#5f9e78', step: '0.01' }
  ]
  },
  totalClasesPrueba: {
  title: 'TOTAL CLASES DE PRUEBA',
  type: 'bar',
  fields: [
- { key: 'clases', label: 'CLASES DE PRUEBA', color: '#a8c5e0' },
- { key: 'asistencias', label: 'ASISTENCIAS', color: '#e6d9b8' },
+ { key: 'clases', label: 'CLASES DE PRUEBA', color: '#4a7ba3' },
+ { key: 'asistencias', label: 'ASISTENCIAS', color: '#cf9a52' },
  { key: 'vendidas', label: 'VENDIDAS', color: '#6b8f71' }
  ]
  },
  clasesVendidasPorEstilo: {
  title: 'CLASES VENDIDAS POR ESTILO',
  fields: [
- { key: 'taiChi', label: 'TAI CHI', color: '#a8c5e0' },
- { key: 'meditacion', label: 'MEDITACIÓN', color: '#c9b8e0' },
- { key: 'ashtangaVinyasa', label: 'ASHTANGA VINYASA', color: '#a8d9b8' },
- { key: 'ashtangaMysore', label: 'ASHTANGA MYSORE', color: '#e0b8c9' },
- { key: 'yogaSuave', label: 'YOGA SUAVE', color: '#e8c9a0' },
- { key: 'hathaYoga', label: 'HATHA YOGA', color: '#a0d9d0' }
+ { key: 'taiChi', label: 'TAI CHI', color: '#4a7ba3' },
+ { key: 'meditacion', label: 'MEDITACIÓN', color: '#9c7fc0' },
+ { key: 'ashtangaVinyasa', label: 'ASHTANGA VINYASA', color: '#5f9e78' },
+ { key: 'ashtangaMysore', label: 'ASHTANGA MYSORE', color: '#c46b8a' },
+ { key: 'yogaSuave', label: 'YOGA SUAVE', color: '#d9a054' },
+ { key: 'hathaYoga', label: 'HATHA YOGA', color: '#4fa39c' }
  ]
  },
  ingresoInversionPautas: {
