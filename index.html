@@ -704,8 +704,8 @@
  title: 'SUEROTERAPIA PACIENTES',
  type: 'bar',
  fields: [
- { key: 'manana', label: 'PACIENTES MAÑANA', color: '#3a3a38' },
- { key: 'tarde', label: 'PACIENTES TARDE', color: '#b08d57' }
+ { key: 'manana', label: 'PACIENTES MAÑANA', color: '#e6d9b8' },
+ { key: 'tarde', label: 'PACIENTES TARDE', color: '#8fbf9f' }
  ]
  },
  sueroterapiaRenta: {
@@ -714,29 +714,28 @@
  valueFormat: 'currency',
  showValueLabels: true,
  fields: [
- { key: 'manana', label: 'RENTA MAÑANA', color: '#3a3a38', step: '0.01' },
- { key: 'tarde', label: 'RENTA TARDE', color: '#b08d57', step: '0.01' }
+ { key: 'manana', label: 'RENTA MAÑANA', color: '#e6d9b8', step: '0.01' },
+ { key: 'tarde', label: 'RENTA TARDE', color: '#8fbf9f', step: '0.01' }
  ]
  },
  totalClasesPrueba: {
  title: 'TOTAL CLASES DE PRUEBA',
  type: 'bar',
  fields: [
- { key: 'clases', label: 'CLASES DE PRUEBA', color: '#3a3a38' },
- { key: 'asistencias', label: 'ASISTENCIAS', color: '#b08d57' },
+ { key: 'clases', label: 'CLASES DE PRUEBA', color: '#a8c5e0' },
+ { key: 'asistencias', label: 'ASISTENCIAS', color: '#e6d9b8' },
  { key: 'vendidas', label: 'VENDIDAS', color: '#6b8f71' }
  ]
  },
  clasesVendidasPorEstilo: {
  title: 'CLASES VENDIDAS POR ESTILO',
- type: 'bar',
  fields: [
- { key: 'taiChi', label: 'TAI CHI', color: '#3a3a38' },
- { key: 'meditacion', label: 'MEDITACIÓN', color: '#b08d57' },
- { key: 'ashtangaVinyasa', label: 'ASHTANGA VINYASA', color: '#6b8f71' },
- { key: 'ashtangaMysore', label: 'ASHTANGA MYSORE', color: '#7a6b8f' },
- { key: 'yogaSuave', label: 'YOGA SUAVE', color: '#b56b56' },
- { key: 'hathaYoga', label: 'HATHA YOGA', color: '#4a7a8c' }
+ { key: 'taiChi', label: 'TAI CHI', color: '#a8c5e0' },
+ { key: 'meditacion', label: 'MEDITACIÓN', color: '#c9b8e0' },
+ { key: 'ashtangaVinyasa', label: 'ASHTANGA VINYASA', color: '#a8d9b8' },
+ { key: 'ashtangaMysore', label: 'ASHTANGA MYSORE', color: '#e0b8c9' },
+ { key: 'yogaSuave', label: 'YOGA SUAVE', color: '#e8c9a0' },
+ { key: 'hathaYoga', label: 'HATHA YOGA', color: '#a0d9d0' }
  ]
  },
  ingresoInversionPautas: {
@@ -1162,7 +1161,7 @@
  const groupPadding = groupWidth * 0.1;
  const usableWidth = groupWidth - groupPadding;
  const naturalBarWidth = Math.max(4, (usableWidth - barGap * (rows.length - 1)) / rows.length);
- const barWidth = Math.max(3, naturalBarWidth * 0.6);
+ const barWidth = Math.max(3, naturalBarWidth * 0.85);
  const clusterWidth = rows.length * barWidth + (rows.length - 1) * barGap;
  const startX = groupX + (groupWidth - clusterWidth) / 2;
  rows.forEach((row, ri) => {
