@@ -593,6 +593,14 @@
 </defs></svg>
 <!-- LOGIN --><div id="login-screen"><img src="image/logoummanabc.png" alt="ummana" /><div id="login-form"><input type="email" id="username" placeholder="email" autocomplete="off" /><input type="password" id="password" placeholder="contraseña" /><button onclick="handleLogin()">ingresar</button><p id="error-msg">usuario o contraseña incorrectos</p></div></div><!-- ADMIN -->
 <div id="admin-screen"><img src="image/logoummanabc.png" alt="ummana" /><div class="charts-grid" id="charts-grid">
+<div class="chart-card" data-chart-id="renta">
+<div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">RENTA</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('renta')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+<div class="chart-body">
+<svg class="chart-svg" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
+<p class="chart-empty">Todavía no hay datos cargados.</p>
+<div class="chart-legend"></div>
+</div>
+</div>
 <div class="chart-card" data-chart-id="sueroterapiaPacientes">
 <div class="chart-card-header" onclick="toggleChartCard(this)"><h3 class="chart-title">SUEROTERAPIA PACIENTES</h3><div class="chart-card-header-right"><button class="btn-edit" onclick="event.stopPropagation(); openChartEditor('sueroterapiaPacientes')">editar</button><svg class="chart-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div></div>
 <div class="chart-body">
@@ -677,6 +685,21 @@
  // Para agregar un nuevo gráfico: sumar una entrada acá con su id, título y campos,
  // y agregar la tarjeta correspondiente en el HTML de #charts-grid con el mismo data-chart-id.
  const CHARTS_CONFIG = {
+ renta: {
+ title: 'RENTA',
+ type: 'bar',
+ dynamicCategories: true,
+ valueFormat: 'currency',
+ showValueLabels: true,
+ categories: [
+ 'ALQUILERES', 'CLASES (+ talleres recurrentes)',
+ 'OFICIOS (encuadernación, alfarería, puntillismo, etc.)',
+ 'SUEROS', 'SUPLEMENTACIÓN', 'CREMAS', 'COLÁGENOS'
+ ],
+ categoryColors: [
+ '#4a7ba3', '#5f8f6b', '#c98fa0', '#cf6a54', '#d4ac54', '#8672a8', '#6f8299'
+ ]
+ },
  sueroterapiaPacientes: {
  title: 'SUEROTERAPIA PACIENTES',
  fields: [
@@ -795,6 +818,7 @@
  function renderChart(chartId) {
  const config = CHARTS_CONFIG[chartId];
  if (config.type === 'pie') { renderPieChart(chartId); return; }
+ if (config.dynamicCategories) { renderDynamicBarChart(chartId); return; }
  const card = document.querySelector(`.chart-card[data-chart-id="${chartId}"]`);
  if (!card) return;
  const svg = card.querySelector('.chart-svg');
@@ -1066,6 +1090,99 @@
  });
  }
 
+ // ===== GRÁFICO DE BARRAS CON RUBROS DINÁMICOS (ej: RENTA) =====
+ function renderDynamicBarChart(chartId) {
+ const config = CHARTS_CONFIG[chartId];
+ const card = document.querySelector(`.chart-card[data-chart-id="${chartId}"]`);
+ if (!card) return;
+ const svg = card.querySelector('.chart-svg');
+ const empty = card.querySelector('.chart-empty');
+ const legend = card.querySelector('.chart-legend');
+ const entries = chartsData[chartId] || {};
+ const keys = Object.keys(entries).sort();
+ svg.innerHTML = '';
+ legend.innerHTML = '';
+ const monthRows = {};
+ keys.forEach(k => { monthRows[k] = (entries[k] || []).filter(r => r.categoria && Number(r.valor) > 0); });
+ const activeKeys = keys.filter(k => monthRows[k].length > 0);
+ if (activeKeys.length === 0) {
+ empty.style.display = 'block';
+ svg.style.display = 'none';
+ legend.style.display = 'none';
+ return;
+ }
+ empty.style.display = 'none';
+ svg.style.display = 'block';
+ legend.style.display = 'flex';
+ const W = 640, H = 300, padL = 44, padR = 20, padT = 20, padB = 40;
+ const plotW = W - padL - padR, plotH = H - padT - padB;
+ let maxVal = 0;
+ activeKeys.forEach(k => { monthRows[k].forEach(r => { maxVal = Math.max(maxVal, Number(r.valor)); }); });
+ maxVal = maxVal === 0 ? 10 : Math.ceil(maxVal * 1.15);
+ const groupWidth = plotW / activeKeys.length;
+ const yScale = v => padT + plotH - (v / maxVal) * plotH;
+ const ns = 'http://www.w3.org/2000/svg';
+ for (let g = 0; g <= 4; g++) {
+ const y = padT + (plotH / 4) * g;
+ const line = document.createElementNS(ns, 'line');
+ line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+ line.setAttribute('y1', y); line.setAttribute('y2', y);
+ line.setAttribute('stroke', '#e0ddd9'); line.setAttribute('stroke-width', '1');
+ svg.appendChild(line);
+ const label = document.createElementNS(ns, 'text');
+ label.setAttribute('x', padL - 8); label.setAttribute('y', y + 3);
+ label.setAttribute('text-anchor', 'end'); label.setAttribute('font-size', '9');
+ label.setAttribute('font-family', 'Montserrat, sans-serif'); label.setAttribute('fill', '#999');
+ label.textContent = formatChartValue(config, maxVal - (maxVal / 4) * g);
+ svg.appendChild(label);
+ }
+ const usedCategories = new Set();
+ activeKeys.forEach((k, i) => {
+ const [y, m] = k.split('-');
+ const monthLabel = (MONTHS.find(mm => mm.v === m) || {}).l || m;
+ const groupX = padL + i * groupWidth;
+ const label = document.createElementNS(ns, 'text');
+ label.setAttribute('x', groupX + groupWidth / 2); label.setAttribute('y', H - padB + 18);
+ label.setAttribute('text-anchor', 'middle'); label.setAttribute('font-size', '8.5');
+ label.setAttribute('font-family', 'Montserrat, sans-serif'); label.setAttribute('fill', '#777');
+ label.setAttribute('letter-spacing', '0.03em');
+ label.textContent = `${monthLabel.slice(0,3)} ${y}`;
+ svg.appendChild(label);
+ const rows = monthRows[k];
+ const barGap = 6;
+ const barWidth = Math.max(4, (groupWidth - barGap * (rows.length + 1)) / rows.length);
+ rows.forEach((row, ri) => {
+ const val = Number(row.valor);
+ const color = categoryColor(config, row.categoria);
+ usedCategories.add(row.categoria);
+ const barX = groupX + barGap + ri * (barWidth + barGap);
+ const yPos = yScale(val);
+ const rect = document.createElementNS(ns, 'rect');
+ rect.setAttribute('x', barX); rect.setAttribute('y', yPos);
+ rect.setAttribute('width', barWidth); rect.setAttribute('height', (padT + plotH) - yPos);
+ rect.setAttribute('fill', color); rect.setAttribute('rx', '2');
+ svg.appendChild(rect);
+ if (config.showValueLabels) {
+ const vLabel = document.createElementNS(ns, 'text');
+ vLabel.setAttribute('x', barX + barWidth / 2); vLabel.setAttribute('y', yPos - 6);
+ vLabel.setAttribute('text-anchor', 'middle'); vLabel.setAttribute('font-size', '7');
+ vLabel.setAttribute('font-family', 'Montserrat, sans-serif'); vLabel.setAttribute('font-weight', '600');
+ vLabel.setAttribute('fill', color);
+ vLabel.textContent = formatChartValue(config, val);
+ svg.appendChild(vLabel);
+ }
+ });
+ });
+ config.categories.forEach(cat => {
+ if (!usedCategories.has(cat)) return;
+ const item = document.createElement('div');
+ item.className = 'chart-legend-item';
+ const color = categoryColor(config, cat);
+ item.innerHTML = `<span class="chart-legend-dot" style="background:${color}"></span>${cat}`;
+ legend.appendChild(item);
+ });
+ }
+
  function populateYearMonthSelects() {
  const yearSel = document.getElementById('chart-year');
  const monthSel = document.getElementById('chart-month');
@@ -1131,7 +1248,7 @@
  yearSel.value = String(now.getFullYear());
  monthSel.value = String(now.getMonth() + 1).padStart(2, '0');
  if (!yearSel.value) yearSel.selectedIndex = 0;
- if (config.type === 'pie') {
+ if (config.dynamicCategories) {
  fillPieRowsFromEntry(chartId, yearSel.value, monthSel.value);
  yearSel.onchange = () => fillPieRowsFromEntry(chartId, yearSel.value, monthSel.value);
  monthSel.onchange = () => fillPieRowsFromEntry(chartId, yearSel.value, monthSel.value);
@@ -1165,7 +1282,7 @@
  const key = `${year}-${month}`;
  const status = document.getElementById('chart-modal-status');
  let entry;
- if (config.type === 'pie') {
+ if (config.dynamicCategories) {
  entry = pieEditRows
  .filter(r => r.categoria && r.valor !== '' && r.valor !== undefined)
  .map(r => ({ categoria: r.categoria, valor: Number(r.valor) || 0 }));
@@ -1180,7 +1297,7 @@
  status.style.color = '#777';
  try {
  chartsData[chartId] = chartsData[chartId] || {};
- const isEmpty = config.type === 'pie'
+ const isEmpty = config.dynamicCategories
  ? entry.length === 0
  : Object.values(entry).every(v => Number(v) === 0);
  let savePromise;
