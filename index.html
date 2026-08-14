@@ -1150,12 +1150,17 @@
  svg.appendChild(label);
  const rows = monthRows[k];
  const barGap = 6;
- const barWidth = Math.max(4, (groupWidth - barGap * (rows.length + 1)) / rows.length);
+ const groupPadding = groupWidth * 0.1;
+ const usableWidth = groupWidth - groupPadding;
+ const naturalBarWidth = Math.max(4, (usableWidth - barGap * (rows.length - 1)) / rows.length);
+ const barWidth = Math.max(3, naturalBarWidth * 0.6);
+ const clusterWidth = rows.length * barWidth + (rows.length - 1) * barGap;
+ const startX = groupX + (groupWidth - clusterWidth) / 2;
  rows.forEach((row, ri) => {
  const val = Number(row.valor);
  const color = categoryColor(config, row.categoria);
  usedCategories.add(row.categoria);
- const barX = groupX + barGap + ri * (barWidth + barGap);
+ const barX = startX + ri * (barWidth + barGap);
  const yPos = yScale(val);
  const rect = document.createElementNS(ns, 'rect');
  rect.setAttribute('x', barX); rect.setAttribute('y', yPos);
