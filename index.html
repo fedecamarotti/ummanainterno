@@ -711,7 +711,7 @@
  type: 'bar',
  dynamicCategories: true,
  valueFormat: 'currency',
- showValueLabels: true,
+ showValueLabels: false,
  categories: [
  'ALQUILERES', 'CLASES', 'OFICIOS', 'JORNADAS',
  'SUEROS', 'SUPLEMENTACIÓN', 'CREMAS', 'COLÁGENOS'
@@ -808,6 +808,18 @@
  function categoryColor(config, categoria) {
  const idx = (config.categories || []).indexOf(categoria);
  return idx >= 0 ? config.categoryColors[idx] : '#999';
+ }
+ // Devuelve un "salto" redondo (1, 2 o 5 x potencia de 10) para que el eje Y quede en números lindos
+ function niceAxisStep(rawMax, divisions) {
+ const rough = rawMax / divisions;
+ const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
+ const residual = rough / magnitude;
+ let niceResidual;
+ if (residual <= 1) niceResidual = 1;
+ else if (residual <= 2) niceResidual = 2;
+ else if (residual <= 5) niceResidual = 5;
+ else niceResidual = 10;
+ return niceResidual * magnitude;
  }
  const MONTHS = [
  { v: '01', l: 'ENERO' }, { v: '02', l: 'FEBRERO' }, { v: '03', l: 'MARZO' },
@@ -1146,14 +1158,18 @@
  legend.style.display = 'flex';
  const W = 640, H = 300, padL = 44, padR = 20, padT = 20, padB = 40;
  const plotW = W - padL - padR, plotH = H - padT - padB;
- let maxVal = 0;
- activeKeys.forEach(k => { monthRows[k].forEach(r => { maxVal = Math.max(maxVal, Number(r.valor)); }); });
- maxVal = maxVal === 0 ? 10 : Math.ceil(maxVal * 1.15);
+ let dataMax = 0;
+ activeKeys.forEach(k => { monthRows[k].forEach(r => { dataMax = Math.max(dataMax, Number(r.valor)); }); });
+ if (dataMax === 0) dataMax = 10;
+ const step = niceAxisStep(dataMax, 4);
+ const maxVal = step * 4;
  const groupWidth = plotW / activeKeys.length;
  const yScale = v => padT + plotH - (v / maxVal) * plotH;
  const ns = 'http://www.w3.org/2000/svg';
+ // grilla: líneas principales cada "step" (2, 4, 6, 8...) y una línea punteada más suave en cada mitad (1, 3, 5, 7...)
  for (let g = 0; g <= 4; g++) {
- const y = padT + (plotH / 4) * g;
+ const val = step * g;
+ const y = padT + plotH - (val / maxVal) * plotH;
  const line = document.createElementNS(ns, 'line');
  line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
  line.setAttribute('y1', y); line.setAttribute('y2', y);
@@ -1163,8 +1179,18 @@
  label.setAttribute('x', padL - 8); label.setAttribute('y', y + 3);
  label.setAttribute('text-anchor', 'end'); label.setAttribute('font-size', '9');
  label.setAttribute('font-family', 'Montserrat, sans-serif'); label.setAttribute('fill', '#999');
- label.textContent = formatChartValue(config, maxVal - (maxVal / 4) * g);
+ label.textContent = formatChartValue(config, val);
  svg.appendChild(label);
+ if (g < 4) {
+ const subVal = val + step / 2;
+ const subY = padT + plotH - (subVal / maxVal) * plotH;
+ const subLine = document.createElementNS(ns, 'line');
+ subLine.setAttribute('x1', padL); subLine.setAttribute('x2', W - padR);
+ subLine.setAttribute('y1', subY); subLine.setAttribute('y2', subY);
+ subLine.setAttribute('stroke', '#ece9e4'); subLine.setAttribute('stroke-width', '1');
+ subLine.setAttribute('stroke-dasharray', '3,3');
+ svg.appendChild(subLine);
+ }
  }
  const usedCategories = new Set();
  activeKeys.forEach((k, i) => {
